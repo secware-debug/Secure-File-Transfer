@@ -1,0 +1,146 @@
+sender = 	X
+receiver = 	Y
+
+
+Sender and Receiver
+
+X Y		Create RSA key pairs (privX, pubX, privY, pubY)
+		Get modulus and exponent of each RSA key and save them to files
+			XPrivate.key, XPublic.key, YPrivate.key, YPublic.key
+
+X Y		Create symetric AES key and save it to a file called
+			xAES.key and yAES.key
+
+
+Sender:
+
+X		Read private and public key info from files
+		Generate RSA keys from info
+
+X		Get filename of message from user
+
+X		Read in file (called message)
+		Store file in memory as a byte array
+
+X		Calculate the SHA256 hash value of the file
+		Store the hash in memory as a byte array
+		Store the hash as a file named "message.dd"
+		Write the hash value (in base-16) to the log file.
+
+X		Encrypt the hash with privX, call it the digital signature
+		Store the digital signature in memory as a byte array
+		Store the digital signature as a file named "message.ds-msg"
+		Write the digital signature (in base-16) to the log file.
+
+X		Append the message byte array to the digital signature byte array
+		Call this new array hashAndMessage
+
+-->		Send a connection request to Y
+
+<--		Wait for a response/confirmation from Y
+
+-->		Send msg saying that public key is ready to be transmitted
+
+<--		Wait for response/confirmation
+
+-->		Send file XPublic.key to Y
+
+<--		Get confirmation from Y
+
+<--		Wait for message from Y saying that symetric key is ready to be sent
+
+-->		Send response/confirmation
+
+<--		Receive AES key file from Y
+
+-->		Send confirmation to Y
+
+X		Decrypt AES key using privX
+		Load AES key into byte array
+
+X		Initialze AES object using key
+
+X		Encrypt hashAndMessage using AES object
+		Write encrypted file to disk, block by block
+		Save the file as "message.aescipher"
+
+X		If mod mode is active, ask user to modify file before transmission
+
+-->		Send message saying that encrypted file is ready to be transmitted
+
+<--		Wait for response/confirmation
+
+-->		Transmit encrypted file block by block to Y
+
+<--		Wait for response from Y saying transmission accepted
+
+<--		Wait for response from Y confirming hash
+
+X		Close connection
+
+
+
+Receier
+
+Y		Set up a socket
+		Listen for a connection
+
+<--		Receive connection request form X
+
+-->		Open a connection and send confirmation to Y
+
+<--		Wait for a message saying public key is ready to be transmitted
+
+Y		Create a buffered stream reader
+
+-->		Send response/confirmation to X
+
+<--		Receive publicX.key
+
+-->		Send repsonse/confirmation to X
+
+Y		Initalize RSA object with public key
+
+Y		Encrypt yAES.key with publicX
+		Represent encrypted key as byte array in memory
+
+-->		Send message to X saying AES key ready
+
+<--		Wait for message/confirmation
+
+-->		Transmit encrypted AES key to Y
+
+<--		Wait for response/confirmation from Y
+
+...
+
+<--		Wait for message from Y saying encrypted file ready to be transmitted
+
+-->		Send repsonse/confirmation
+
+<--		Receive encrypted file
+		Write it to disk block by block
+		Save it as ""
+
+-->		Send repsonse/confirmation
+
+Y		Ask user to enter name of file to be saved
+
+Y		Read encrypted file from disk block by block
+		Decrypt block using yAES object
+		Extract first XX bytes and save in memory as hash
+		Write remaining blocks/data to <filename>
+
+Y		Calculate SHA256 hash value on remaining blocks/data
+		Write calculated hash to log file in base-16
+
+Y		Initialze RSA object using publicX.key
+
+Y		Use publicX key to decrypt encrypted hash
+		Write decrypted hash to disk as "message.dd"
+
+Y		Compare calculated hash to decrypted hash and write results to log
+
+-->		Send X a message stating if the file transfer was successful (hash values match)
+
+Y		Close connection
