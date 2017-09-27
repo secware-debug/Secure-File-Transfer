@@ -1,6 +1,7 @@
 import logging as log
 import socket
 from xml.dom import minidom
+import settingsParser
 
 class Sender:
     def __init__(self):
@@ -24,10 +25,11 @@ class Sender:
 
 
     def parse_settings(self, file: str):
-        doc = minidom.parse(file)
-        setting_elements = doc.getElementsByTagName("sender_settings")[0].getElementsByTagName("setting")
-        for elm in setting_elements:
-            self.settings.update(elm.attributes.items())
+        self.settings = settingsParser.parse(file, "sender_settings", "setting")
+        # doc = minidom.parse(file)
+        # setting_elements = doc.getElementsByTagName("sender_settings")[0].getElementsByTagName("setting")
+        # for elm in setting_elements:
+        #     self.settings.update(elm.attributes.items())
 
 
     def create_connection(self) -> socket.socket:

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <configuration>
     <keyGen_settings>
-        <setting logFile="log_keyGen.txt"/>
+        <setting logFile="log_keyUtils.txt"/>
         <setting logFormat="%(levelname)s:&#x9;%(message)s"/>
         <setting logMode="w"/>
         <setting logLevel="10"/>
@@ -11,6 +11,7 @@
         <setting AESFile="./keys/aes_key.xml"/>
 
         <setting RSAKeySize="1024"/>
+        <setting AESKeySize="256"/>
 
 
     </keyGen_settings>>

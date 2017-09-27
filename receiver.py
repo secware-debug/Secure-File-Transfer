@@ -2,9 +2,10 @@ import socket
 import threading
 from xml.dom import minidom
 import logging
-from logging import log
+import settingsParser
 
 settings = {}
+
 
 def importSettings(filename):
     """
@@ -14,17 +15,13 @@ def importSettings(filename):
     :param filename:
     :return dictionary of settings:
     """
-    imported_settings = {}
-    document = minidom.parse(filename)
-    setting_elms = document.getElementsByTagName("receiver_settings")[0].getElementsByTagName("setting")
-    for child in setting_elms:    # loop through each setting element
-        imported_settings.update(child.attributes.items())
-    return imported_settings
+    global settings
+    settings = settingsParser.parse(filename, "receiver_settings", "setting")
+
 
 def init():
     # import settings from XML file
-    global settings
-    settings = importSettings("config_receiver.xml")
+    importSettings("config_receiver.xml")
     logging.basicConfig(filename=settings["logFile"], filemode=settings["logMode"], level=int(settings["logLevel"]),
                         format=settings["logFormat"])
 
@@ -58,8 +55,6 @@ def accept_connections(sock : socket):
         socket_id += 1
 
 
-
-
 class ThreadedReceiver(threading.Thread):
     """
     Inherits from the Thread class which makes setting up multi-threading simple.
@@ -70,7 +65,6 @@ class ThreadedReceiver(threading.Thread):
         self.connection = connection
         self.remote_address = remote
         self.connection_id = id
-
 
     def run(self):
         logging.info("Thread #{} created and started".format(self.connection_id))
