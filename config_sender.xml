@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <configuration>
     <sender_settings>
-        <setting pauseBeforeSend="false"/>
+        <setting pauseBeforeSend="true"/>
 
         <setting logFile="log_sender.txt"/>
         <setting logFormat="%(levelname)s:&#x9;%(message)s"/>

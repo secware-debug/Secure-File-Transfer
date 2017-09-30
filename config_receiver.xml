@@ -10,8 +10,11 @@
         <setting AESFile="./keys/aes_key.xml"/>
 
         <setting signatureSize="256"/>
+        <setting hashFile="./receiver_received/results/message.dd"/>
+        <setting hashEncoding="base16"/>
 
         <setting receiveDirectory="./receiver_received/"/>
+        <setting resultsDirectory="./receiver_received/results"/>
         <setting decryptedFilePrefix="decrypt_"/>
     </receiver_settings>>
 </configuration>

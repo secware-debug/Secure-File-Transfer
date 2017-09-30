@@ -9,6 +9,8 @@ from Crypto.PublicKey import RSA
 import keyUtils
 from Crypto.Cipher import PKCS1_OAEP
 import base64
+from Crypto.Hash import SHA256
+from Crypto.Signature import PKCS1_v1_5
 
 settings = {}
 
@@ -68,7 +70,7 @@ class ThreadedReceiver(threading.Thread):
     '''
 
     BUFFER_SIZE = 8096
-    __file_count = 1
+    _file_count = 1
 
     @staticmethod
     def make_directory(filename):
@@ -195,25 +197,55 @@ class ThreadedReceiver(threading.Thread):
         self.send_message('ack')
 
         # Decrypt the file, extracting the digital signature in the process
-        # Decrypt the digital signature and keep the contents in memory
+        # Decrypt the digital signature and store it in memory for later
         # Write the unencrypted file to disk
-        orig_hash = ''
+        dig_sig_as_bin_str = None
+        sha_hash = SHA256.new()
         sig_size = int(settings["signatureSize"])
         log.info("Opening encrypted file")
-        with open(enc_filename, mode='rb') as f:
+        with open(enc_filename, mode='rb') as f1:
             log.info("Extracting and decrypting digital signature")
-            enc_sig = f.read(sig_size)
+            enc_sig = f1.read(sig_size)
             base16_enc_dig_sig = aes_cipher.decrypt(enc_sig)
             log.info('\n' + '*' * 25 + "RCVD SIGNATURE" + '*' * 25 + "\n{}\n".format(str(base16_enc_dig_sig, 'utf-8')) +
                      '*' * 25 + "LENGTH = {:d}".format(len(base16_enc_dig_sig)) + "*" * 25)
+            dig_sig_as_bin_str = base64.b16decode(base16_enc_dig_sig)
 
-            decoded_dig_sig = base64.b16decode(base16_enc_dig_sig)
-            orig_hash = str(pub_cipher.encrypt(decoded_dig_sig), 'utf-8')
-            log.info('\n' + '*' * 25 + "ORIGINAL HASH" + '*' * 25 + "\n{}\n".format(orig_hash) +
-                     '*' * 25 + "LENGTH = {:d}".format(len(orig_hash)) + "*" * 25)
+            results_directory = settings["resultsDirectory"]
+            new_baseame = settings['decryptedFilePrefix'] + str(ThreadedReceiver._file_count)
+            new_filename = os.path.join(results_directory, new_baseame)
+            os.makedirs(os.path.dirname(new_filename), exist_ok=True)
+            ThreadedReceiver._file_count += 1
 
+            with open(new_filename, mode='wb') as f2:
+                for enc_chunk in iter((lambda: f1.read(ThreadedReceiver.BUFFER_SIZE)), b''):
+                    dec_chunk = aes_cipher.decrypt(enc_chunk)
+                    sha_hash.update(dec_chunk)
+                    f2.write(dec_chunk)
 
+        # Write the message digest as a hex encoded value to log and to file 'message.dd'
+        hash_file = settings["hashFile"]
+        log.info("Writing message digest to file {}".format(hash_file))
+        log.info("Checking to see if directory exists for file {} and creating it if needed".format(hash_file))
+        os.makedirs(os.path.dirname(hash_file), exist_ok=True)
+        hash_as_hex_str = sha_hash.hexdigest().upper()
+        log.info('\n' + '*' * 25 + "SHA256 HASH" + '*' * 25 + "\n{}\n".format(hash_as_hex_str) +
+                 '*' * 25 + "LENGTH = {:d}".format(len(hash_as_hex_str)) + "*" * 25)
+        with open(hash_file, mode='w') as f:
+            f.write(hash_as_hex_str)
 
+        # Verify that calculated hash matches the digital signature that was sent
+        self.receive_message()
+        log.info("Verifying that signature matches calculated hash...")
+        cypher = PKCS1_v1_5.new(pub_key)
+        is_match = cypher.verify(sha_hash, dig_sig_as_bin_str)
+        if is_match:
+            msg = "\n    __  __     _     _____    ___   _  _ \n   |  \/  |   /_\   |_   _|  / __| | || |\n   | |\/| |  / _ \    | |   | (__  | __ |\n   |_|  |_| /_/ \_\   |_|    \___| |_||_|"
+            self.send_message("true")
+        else:
+            msg = "\n___     ___    ___   ___             \n  / _ \   / _ \  | _ \ / __|            \n | (_) | | (_) | |  _/ \__ \  _   _   _ \n  \___/   \___/  |_|   |___/ (_) (_) (_)"
+            self.send_message('false')
+        log.info(msg)
 
 
 

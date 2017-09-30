@@ -4,6 +4,7 @@ from xml.dom import minidom
 import settingsParser
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA256
 from Crypto.Cipher import AES
 import keyUtils
@@ -148,27 +149,24 @@ class Sender:
         log.info('\n' + '*' * 25 + "SHA256 HASH" + '*' * 25 + "\n{}\n".format(sha_hash.hexdigest().upper()) + '*' * 61)
         return sha_hash
 
-    def get_rsa_signature(self, digest_as_string: str, key: RSA._RSAobj) -> str:
+    def get_rsa_signature(self, digest: str, key: RSA._RSAobj) -> str:
         log.info("Generating RSA signature using private key")
         log.info("\t Performing encryption")
-        cipher = PKCS1_OAEP.new(key)
-
-        # sig_as_bin = cipher.encrypt(digest_as_string.encode('utf-8'))
-        # alternate signature generation using pure RSA without any padding protocol
-        sig_as_bin = key.sign(digest_as_string.encode('utf-8'), '')[0]
+        cipher = PKCS1_v1_5.new(key)
+        sig_as_bin_str = cipher.sign(digest)
 
         # encode the signature with base64
-        sig_as_str = base64.b16encode(sig_as_bin).decode('utf-8')
-        log.info('\n' + '*' * 25 + "SIGNATURE" + '*' * 25 + "\n{}\n".format(sig_as_str) +
-                 '*' * 25 + "LENGTH = {:d}".format(len(sig_as_str)) + "*" * 25)
+        sig_as_base16_str = base64.b16encode(sig_as_bin_str).decode('utf-8')
+        log.info('\n' + '*' * 25 + "SIGNATURE" + '*' * 25 + "\n{}\n".format(sig_as_base16_str) +
+                 '*' * 25 + "LENGTH = {:d}".format(len(sig_as_base16_str)) + "*" * 25)
 
         # --- Code to test decoding and decryption of hash ---
-        decoded_sig = base64.b16decode(sig_as_str)
-        decrypted_sig = str(cipher.decrypt(decoded_sig), 'utf-8').upper()
-        log.info("\n------\n{}\n-------".format(decrypted_sig))
+        decoded_sig = base64.b16decode(sig_as_base16_str)
+        match = cipher.verify(digest, decoded_sig)
+        log.info("\n------\n{}\n-------".format(match))
 
 
-        return sig_as_str
+        return sig_as_base16_str
 
 
     def cleanup(self):
@@ -208,7 +206,7 @@ class Sender:
         # Encrypt the hash with senders private key, call it the digital signature
 		# Write the digital signature (in base-16) to the log file. (used base-64)
         # Store the digital signature as a file named "message.ds-msg"
-        digital_sig = self.get_rsa_signature(sha_hash.hexdigest(), rsa_key)
+        digital_sig = self.get_rsa_signature(sha_hash, rsa_key)
         filename = self.settings["signatureFile"]
         Sender.make_directory(filename)
         log.info("Writing digital signature to file {}".format(filename))
@@ -267,7 +265,7 @@ class Sender:
                 f.write(enc_chunk)
 
         # If option is enabled, pause the program to allow modification of encrypted file before transmission
-        should_pause = bool(self.settings['pauseBeforeSend'].lower() is 'yes')
+        should_pause = self.settings['pauseBeforeSend'].lower() == 'true'
         if should_pause:
             input("Press return when you are ready to transmit the encrypted signature+message file")
 
@@ -278,6 +276,18 @@ class Sender:
         # Send encrypted file and wait for ack that it was received
         self.send_file(out_file)
         self.receive_message()
+
+        # Ask and wait for response indicating that file was accepted as unaltered
+        self.send_message("Did your computed hash match my digital signature?")
+        m = self.receive_message()
+        did_match = m == 'true'
+        if did_match:
+            msg = "\n    __  __     _     _____    ___   _  _ \n   |  \/  |   /_\   |_   _|  / __| | || |\n   | |\/| |  / _ \    | |   | (__  | __ |\n   |_|  |_| /_/ \_\   |_|    \___| |_||_|"
+        else:
+            msg = "\n   ___     ___    ___   ___             \n  / _ \   / _ \  | _ \ / __|            \n | (_) | | (_) | |  _/ \__ \  _   _   _ \n  \___/   \___/  |_|   |___/ (_) (_) (_)"
+
+        log.info(msg)
+
 
 
 
