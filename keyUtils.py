@@ -178,8 +178,8 @@ class KeyUtils():
         segment_size = 8
         binary_encoding = "base64"
 
-        encoded_key = binascii.b2a_base64(key_val, newline=False).decode("utf-8")
-        encoded_iv = binascii.b2a_base64(iv, newline=False).decode("utf-8")
+        encoded_key = binascii.b2a_base64(key_val).decode("utf-8").replace('\n', '')
+        encoded_iv = binascii.b2a_base64(iv).decode("utf-8").reokace('\n', '')
 
         root = ET.Element("AES")
         root.set("type", type)

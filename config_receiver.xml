@@ -6,5 +6,12 @@
         <setting logMode="w"/>
         <setting logLevel="10"/>
         <setting port="2020"/>
+
+        <setting AESFile="./keys/aes_key.xml"/>
+
+        <setting signatureSize="256"/>
+
+        <setting receiveDirectory="./receiver_received/"/>
+        <setting decryptedFilePrefix="decrypt_"/>
     </receiver_settings>>
 </configuration>

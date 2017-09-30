@@ -10,8 +10,11 @@
 /public_key.xml
 /private_key.xml
 __pycache__/
-private_key.xml
 /keys/
-keys/
 /log_keyUtils.txt
-log_keyUtils.txt
+/test_file_1.txt
+results/
+/received/
+xxx.bin
+yyy.bin
+/receiver_received/

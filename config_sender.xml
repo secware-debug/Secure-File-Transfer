@@ -1,11 +1,31 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <configuration>
     <sender_settings>
+        <setting pauseBeforeSend="false"/>
+
         <setting logFile="log_sender.txt"/>
         <setting logFormat="%(levelname)s:&#x9;%(message)s"/>
         <setting logMode="w"/>
         <setting logLevel="10"/>
+
         <setting remote="localhost"/>
         <setting port="2020"/>
+
+        <setting receiveDirectory="./sender_received/"/>
+
+        <setting RSAPublicFile="./keys/public_key.xml"/>
+        <setting RSAPrivateFile="./keys/private_key.xml"/>
+        <setting RSAMode="PKCS1_OAEP"/>
+
+        <setting AESFile="./keys/aes_key.xml"/>
+        <setting AESMode="3"/>
+        <setting AESSegmentSize="8"/>
+
+        <setting hashFile="./results/message.dd"/>
+        <setting hashEncoding="base16"/>
+
+        <setting signatureFile="./results/message.ds-msg"/>
+
+        <setting encryptedFile="./results/message.aescipher"/>
     </sender_settings>>
 </configuration>
