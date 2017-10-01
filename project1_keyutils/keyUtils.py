@@ -1,15 +1,15 @@
-from xml.dom import minidom
-import logging as log
-import settingsParser
-from Crypto.PublicKey import RSA
-from Crypto.Cipher import AES
-import Crypto.Random
-import os
-import xml.etree.ElementTree as ET
 import binascii
 import copy
+import logging as log
+import os
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
 
+import Crypto.Random
+from Crypto.Cipher import AES
+from Crypto.PublicKey import RSA
 
+from project1_settingsParser import settingsParser
 
 """
 The KeyUtils class is used to generate both RSA key paris and AES symmetric keys. The class has methods for generating
@@ -179,7 +179,7 @@ class KeyUtils():
         binary_encoding = "base64"
 
         encoded_key = binascii.b2a_base64(key_val).decode("utf-8").replace('\n', '')
-        encoded_iv = binascii.b2a_base64(iv).decode("utf-8").reokace('\n', '')
+        encoded_iv = binascii.b2a_base64(iv).decode("utf-8").replace('\n', '')
 
         root = ET.Element("AES")
         root.set("type", type)

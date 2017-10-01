@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <configuration>
     <sender_settings>
+        <setting remote="localhost"/>
+        <setting port="2020"/>
+
+        <setting bufferSize="8096"/>
+
+        <setting requestFileInput="false"/>
         <setting pauseBeforeSend="true"/>
 
         <setting logFile="log_sender.txt"/>
@@ -8,10 +14,9 @@
         <setting logMode="w"/>
         <setting logLevel="10"/>
 
-        <setting remote="localhost"/>
-        <setting port="2020"/>
+        <setting testFile=".\test_files\test_file_1.txt"/>
 
-        <setting receiveDirectory="./sender_received/"/>
+        <setting receiveDirectory="./received/"/>
 
         <setting RSAPublicFile="./keys/public_key.xml"/>
         <setting RSAPrivateFile="./keys/private_key.xml"/>

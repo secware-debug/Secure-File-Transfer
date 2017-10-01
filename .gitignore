@@ -18,3 +18,6 @@ results/
 xxx.bin
 yyy.bin
 /receiver_received/
+/project1_sender/log_keyUtils.txt
+/project1_sender/log_sender.txt
+/project1_receiver/log_receiver.txt
