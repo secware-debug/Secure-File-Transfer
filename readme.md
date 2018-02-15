@@ -2,12 +2,12 @@
 
 Use RSA and AES encryption to encrypt and verify the transmission of a file over a TCP connection.
 RSA is used to securely exchange a symmetric AES encryption key, and to sign and verify the SHA256
-message diest of the transmitted file.
+message digest of the transmitted file.
 
 ### **WARNING: DO NOT USE THIS TO TRANSMIT SENSITIVE INFORMATION.**
-This module IS NOT designed to be used in any kind of real world application. Although the underlying
+This module IS NOT designed to be used in any kind of real-world application. Although the underlying
 cryptographic operations are based on well-known and presumably secure standards, the module uses these protocols
-in a custom manner. This customization almost certinally introduces numerous attack vectors and security holes.
+in a custom manner. This customization almost certainly introduces numerous attack vectors and security holes.
 
 ---
 
@@ -16,7 +16,7 @@ an XML file for configuration and settings data.
 
 ### SENDER:
 This class is used to establish a connection to a remote host and then securely transmit a file using a combination
-of public encryption, symmetric encryption, and hashing. The overall protocol is custom, but follows
+of public encryption, symmetric encryption, and hashing. The overall protocol is custom but follows
 the basic structure of an HTTPS connection. The chief difference is that there is no support of certificates.
 
 ### RECEIVER:
@@ -64,16 +64,16 @@ RECEIVER:
               * Append them to a file ("decrypt_X")
               * Update a SHA256 message digest
     * After the file has been read and decrypted:
-         * Write the SHA256 has value to disk (message.dd)
+         * Write the SHA256 hash value to disk (message.dd)
          * Use the calculated message digest and RSA public key to verify the digital signature
          * Send the remote host a message stating if the verification was successful
 
 ---
-		 
+         
 CONFIGURATION:
 Configuration information and settings are stored in XML files. Socket addresses, file name and storage locations,
 packet and buffer sizes, log formats, etc can be customized by editing the XML document. Note: Some settings such
-as the modes for AES and RSA encryption are for information purposes only. Changing them will not effect the
+as the modes for AES and RSA encryption are for information purposes only. Changing them will not affect the
 behavior of the program.
 
 
@@ -112,7 +112,7 @@ the keyUtils program can be run on its own.
 NOTES:
 
 1. The module supports the sending and checking of files of any length, regardless of system memory. However, the
-Python implementation of AES encryption and SHA hashing is not as efficient as it would be in a lower level langauge
+Python implementation of AES encryption and SHA hashing is not as efficient as it would be in a lower level language
 such as C or C++. As such, the time involved for cryptographic operations on larger files can be long.
 During tests, the process took around 5 minutes to complete on a 1GB video file.
 
