@@ -245,6 +245,7 @@ class ThreadedReceiver(threading.Thread):
         log.info("Preparing to send ({}) of size {:d} bytes".format(filename, size))
         self.send_message(filename)
         self.send_message(str(size))
+        m = self.receive_message()
         with open(path, mode='rb') as f:
             for chunk in iter((lambda: f.read(ThreadedReceiver._BUFFER_SIZE)), b''):
                 self.socket.send(chunk)
@@ -262,6 +263,7 @@ class ThreadedReceiver(threading.Thread):
         log.info("Receiving file:...")
         filename = self.receive_message()
         size = int(self.receive_message())
+        self.send_message("ack")
         log.info("...Filename: {}  Size: {:d}".format(filename, size))
 
         path = os.path.join(dir_name, filename)

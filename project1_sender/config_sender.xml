@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <configuration>
     <sender_settings>
-        <setting remote="localhost"/>
-        <setting port="2020"/>
+        <setting remote="62.151.181.57"/>
+        <setting port="3000"/>
 
         <setting bufferSize="8096"/>
 
@@ -14,7 +14,7 @@
         <setting logMode="w"/>
         <setting logLevel="10"/>
 
-        <setting testFile=".\test_files\test_file_1.txt"/>
+        <setting testFile="./test_files/test_file_1.txt"/>
 
         <setting receiveDirectory="./received/"/>
 
